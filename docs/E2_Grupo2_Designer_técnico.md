@@ -11,7 +11,7 @@
 | Campo | Preenchimento |
 |-------|---------------|
 | Nome do projeto | Algoritmo de Roteamento para Entregas Urbanas |
-| Repositório GitHub | |
+| Repositório GitHub | https://github.com/GabrielSouzaC/algoritmo-roteamento-entregas-urbanas |
 | Integrante 1 | Gabriel Souza de Carvalho — 38598272 |
 | Integrante 2 | Pedro Henrique dos Santos — 38898381 |
 | Integrante 3 | Carlos Eduardo Laera Prado — 38070715 |

@@ -246,7 +246,7 @@ OK
 - [x] Algoritmo principal (Dijkstra) executando sem erros  
 - [x] Tela de entrada e tela de resultado demonstráveis (CLI funcional)  
 - [x] 3 testes unitários por algoritmo (10 testes no total, todos passando)  
-- [x] ≥ 5 commits com prefixos semânticos (12 commits realizados)  
+- [x] ≥ 5 commits com prefixos semânticos (12+ commits realizados)  
 - [x] Ao menos 1 arquivo de grafo de exemplo em `data/` (`sample_graph.json`)
 
 ---

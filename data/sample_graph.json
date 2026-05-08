@@ -1,0 +1,14 @@
+{
+  "vertices": ["D", "C1", "C2", "C3", "C4", "C5", "C6"],
+  "arestas": [
+    { "origem": "D", "destino": "C1", "peso": 10 },
+    { "origem": "D", "destino": "C2", "peso": 15 },
+    { "origem": "C1", "destino": "C3", "peso": 12 },
+    { "origem": "C1", "destino": "C4", "peso": 10 },
+    { "origem": "C2", "destino": "C4", "peso": 5 },
+    { "origem": "C2", "destino": "C5", "peso": 20 },
+    { "origem": "C3", "destino": "C6", "peso": 8 },
+    { "origem": "C4", "destino": "C6", "peso": 7 },
+    { "origem": "C5", "destino": "C6", "peso": 25 }
+  ]
+}

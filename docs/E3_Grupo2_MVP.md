@@ -182,7 +182,7 @@ Mensagem amigável de sucesso ou erro (quando não existe caminho)
 | Dijkstra | Caso base (D → C6) | ✅ | `python -m unittest tests.test_dijkstra.TestDijkstra.test_caminho_minimo_d_para_c6 -v` |
 | Dijkstra | Grafo vazio / sem caminho | ✅ | `python -m unittest tests.test_dijkstra.TestDijkstra.test_grafo_vazio -v` |
 | Dijkstra | Grafo completo | ✅ | `python -m unittest tests.test_dijkstra.TestDijkstra.test_grafo_completo -v` |
-| Dijkstra | Caminho inexistente | ✅ | | `python -m unittest tests.test_dijkstra.TestDijkstra.test_caminho_inexistente -v` |
+| Dijkstra | Caminho inexistente | ✅ | `python -m unittest tests.test_dijkstra.TestDijkstra.test_caminho_inexistente -v` |
 | Graph | Adicionar vértice/aresta | ✅ | `python -m unittest tests.test_graph -v` |
 | JSON Reader | Carregar arquivo válido | ✅ | `python -m unittest tests.test_json_reader -v` |
 

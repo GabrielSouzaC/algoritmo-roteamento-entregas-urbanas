@@ -1,7 +1,7 @@
 import sys
 import os
 
-# adiciona o diretório raiz ao Python path
+# Adiciona o diretório raiz ao Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.service.route_service import RouteService
@@ -9,12 +9,12 @@ from src.service.route_service import RouteService
 def main():
     print("=" * 60)
     print("   ALGORITMO DE ROTEAMENTO PARA ENTREGAS URBANAS")
-    print("   Teoria dos Grafos - MVP (E3)")
+    print("   Teoria dos Grafos - Finalização do Projeto")
     print("=" * 60)
     
     service = RouteService()
     
-    # carrega o grafo
+    # Carrega o grafo
     if not service.load_graph('data/sample_graph.json'):
         print("❌ Erro ao carregar o grafo.")
         return
@@ -24,7 +24,7 @@ def main():
     print(f"   Vértices: {info['vertices']} | Arestas: {info['edges']}")
     print("-" * 60)
     
-    # loop simples para múltiplas consultas
+    # Loop principal
     while True:
         print("\nDigite a origem e o destino (ou 'sair' para encerrar)")
         origin = input("Origem (ex: D): ").strip().upper()
@@ -41,14 +41,30 @@ def main():
         
         result = service.calculate_route(origin, destination)
         
-        print("\n" + "-" * 40)
+        print("\n" + "-" * 50)
         if result["success"]:
             print("✅ CAMINHO MÍNIMO ENCONTRADO")
             print(f"Caminho: {' → '.join(result['path'])}")
             print(f"Tempo estimado: {result['total_time']} minutos")
+            
+            # Pergunta se quer visualizar o mapa
+            show_viz = input("\nDeseja visualizar o mapa fictício com o caminho destacado? (s/n): ").strip().lower()
+            if show_viz in ['s', 'sim', 'y', 'yes']:
+                try:
+                    from src.visualization.graph_visualizer import GraphVisualizer
+                    visualizer = GraphVisualizer()
+                    visualizer.draw_graph(
+                        service.graph, 
+                        result['path'],
+                        title=f"Mapa Fictício - Rota {origin} → {destination}"
+                    )
+                except ImportError:
+                    print("❌ Módulo de visualização não encontrado (instale networkx e matplotlib).")
+                except Exception as e:
+                    print(f"❌ Erro ao gerar visualização: {e}")
         else:
             print("❌ " + result["message"])
-        print("-" * 40)
+        print("-" * 50)
 
 if __name__ == "__main__":
     main()

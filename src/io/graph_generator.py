@@ -1,4 +1,3 @@
-# src/io/graph_generator.py
 import json
 import random
 from typing import Dict, Any
@@ -7,7 +6,7 @@ from ..core.graph import Graph
 def generate_random_graph(num_vertices: int = 25, density: float = 0.4, 
                          min_weight: int = 1, max_weight: int = 30) -> Graph:
     """
-    Gera um grafo aleatório dirigido e ponderado.
+    gera um grafo aleatório dirigido e ponderado.
     
     Parâmetros:
         num_vertices: quantidade de vértices (20 a 50 recomendado)
@@ -19,7 +18,7 @@ def generate_random_graph(num_vertices: int = 25, density: float = 0.4,
     
     graph = Graph()
     
-    # Criar vértices: D + C1, C2, ..., Cn
+    # criar vértices: D + C1, C2, ..., Cn
     vertices = ["D"]
     for i in range(1, num_vertices):
         vertices.append(f"C{i}")
@@ -27,7 +26,7 @@ def generate_random_graph(num_vertices: int = 25, density: float = 0.4,
     for v in vertices:
         graph.add_vertex(v)
     
-    # Gerar arestas aleatórias
+    # gerar arestas aleatórias
     possible_edges = 0
     for i in range(len(vertices)):
         for j in range(len(vertices)):

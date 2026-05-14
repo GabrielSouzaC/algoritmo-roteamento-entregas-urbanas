@@ -15,7 +15,7 @@ def main():
     service = RouteService()
     
     while True:
-        print("\n" + "="*50)
+        print("\n" + "="*60)
         print("Escolha o tipo de grafo:")
         print("1 - Grafo fixo (sample_graph.json)")
         print("2 - Gerar novo grafo aleatório")
@@ -30,17 +30,14 @@ def main():
             try:
                 num_v = int(input("Número de vértices (20-50): ") or "25")
                 density = float(input("Densidade (0.2-0.6): ") or "0.35")
-                
-                print("Gerando grafo aleatório...")
                 graph = generate_random_graph(num_vertices=num_v, density=density)
                 save_graph_to_json(graph, 'data/generated_graphs/grafo_aleatorio_temp.json')
-                service.graph = graph  # carrega diretamente
-                print("✅ Grafo aleatório gerado e carregado!")
+                service.graph = graph
+                print("✅ Grafo aleatório gerado!")
             except Exception as e:
-                print(f"❌ Erro ao gerar grafo: {e}")
+                print(f"❌ Erro: {e}")
                 continue
         else:
-            # Carrega o grafo fixo
             if not service.load_graph('data/sample_graph.json'):
                 print("❌ Erro ao carregar grafo fixo.")
                 continue
@@ -48,27 +45,37 @@ def main():
 
         info = service.get_graph_info()
         print(f"   Vértices: {info['vertices']} | Arestas: {info['edges']}")
-        
-        # Loop de consultas
+
+        # Escolha do algoritmo
+        print("\nEscolha o algoritmo:")
+        print("1 - Dijkstra (recomendado)")
+        print("2 - Bellman-Ford (comparação)")
+        alg_choice = input("Digite (1/2): ").strip()
+
+        use_bellman = alg_choice == "2"
+
+        # Loop de rotas
         while True:
             print("\n" + "-"*60)
             origin = input("Origem (ex: D) ou 'voltar': ").strip().upper()
-            
             if origin in ['VOLTAR', 'SAIR', '0']:
                 break
                 
-            destination = input("Destino (ex: C10): ").strip().upper()
-            
-            result = service.calculate_route(origin, destination)
-            
-            print("\n" + "-" * 50)
+            destination = input("Destino (ex: C15): ").strip().upper()
+
+            if use_bellman:
+                from src.algorithms.bellman_ford import find_shortest_path_bellman_ford
+                result = find_shortest_path_bellman_ford(service.graph, origin, destination)
+            else:
+                result = service.calculate_route(origin, destination)
+
+            print("\n" + "-" * 55)
             if result["success"]:
-                print("✅ CAMINHO MÍNIMO ENCONTRADO")
+                print(f"✅ CAMINHO MÍNIMO ENCONTRADO ({result.get('algorithm', 'Dijkstra')})")
                 print(f"Caminho: {' → '.join(result['path'])}")
                 print(f"Tempo estimado: {result['total_time']} minutos")
                 
-                show_viz = input("\nVisualizar no mapa fictício? (s/n): ").strip().lower()
-                if show_viz in ['s', 'sim', 'y']:
+                if input("\nVisualizar no mapa fictício? (s/n): ").strip().lower() in ['s', 'sim', 'y']:
                     try:
                         from src.visualization.graph_visualizer import GraphVisualizer
                         visualizer = GraphVisualizer()
@@ -77,7 +84,7 @@ def main():
                         print(f"Erro na visualização: {e}")
             else:
                 print("❌ " + result["message"])
-            print("-" * 50)
+            print("-" * 55)
 
 if __name__ == "__main__":
     main()

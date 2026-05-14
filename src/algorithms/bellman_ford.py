@@ -1,82 +1,91 @@
-from typing import Dict, List, Tuple, Optional
-from ..core.graph import Graph
-from ..core.vertex import Vertex
+# src/main.py
+import sys
+import os
 
-def bellman_ford(graph: Graph, source_label: str, target_label: str) -> Tuple[Optional[List[str]], int]:
-    """
-    Implementa o algoritmo de Bellman-Ford.
-    Capaz de detectar ciclos negativos (embora não seja o caso neste projeto).
-    """
-    # Busca os vértices
-    source = target = None
-    for v in graph.get_vertices():
-        if v.label == source_label:
-            source = v
-        if v.label == target_label:
-            target = v
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from src.service.route_service import RouteService
+from src.io.graph_generator import generate_random_graph, save_graph_to_json
+
+def main():
+    print("=" * 70)
+    print("   ALGORITMO DE ROTEAMENTO PARA ENTREGAS URBANAS")
+    print("   Teoria dos Grafos - Versão Final")
+    print("=" * 70)
     
-    if not source or not target:
-        return None, float('inf')
+    service = RouteService()
+    
+    while True:
+        print("\n" + "="*60)
+        print("Escolha o tipo de grafo:")
+        print("1 - Grafo fixo (sample_graph.json)")
+        print("2 - Gerar novo grafo aleatório")
+        print("0 - Sair")
+        opcao = input("\nDigite a opção (1/2/0): ").strip()
 
-    # Inicialização
-    distances: Dict[Vertex, float] = {vertex: float('inf') for vertex in graph.get_vertices()}
-    predecessors: Dict[Vertex, Optional[Vertex]] = {vertex: None for vertex in graph.get_vertices()}
-    distances[source] = 0
+        if opcao == "0":
+            print("👋 Encerrando o programa...")
+            break
 
-    # Relaxamento de todas as arestas |V|-1 vezes
-    for _ in range(len(graph.get_vertices()) - 1):
-        for vertex in graph.get_vertices():
-            if distances[vertex] == float('inf'):
+        if opcao == "2":
+            try:
+                num_v = int(input("Número de vértices (20-50): ") or "25")
+                density = float(input("Densidade (0.2-0.6): ") or "0.35")
+                graph = generate_random_graph(num_vertices=num_v, density=density)
+                save_graph_to_json(graph, 'data/generated_graphs/grafo_aleatorio_temp.json')
+                service.graph = graph
+                print("✅ Grafo aleatório gerado!")
+            except Exception as e:
+                print(f"❌ Erro: {e}")
                 continue
-            for edge in graph.get_neighbors(vertex):
-                neighbor = edge.target
-                new_distance = distances[vertex] + edge.weight
+        else:
+            if not service.load_graph('data/sample_graph.json'):
+                print("❌ Erro ao carregar grafo fixo.")
+                continue
+            print("✅ Grafo fixo carregado!")
+
+        info = service.get_graph_info()
+        print(f"   Vértices: {info['vertices']} | Arestas: {info['edges']}")
+
+        # Escolha do algoritmo
+        print("\nEscolha o algoritmo:")
+        print("1 - Dijkstra (recomendado)")
+        print("2 - Bellman-Ford (comparação)")
+        alg_choice = input("Digite (1/2): ").strip()
+
+        use_bellman = alg_choice == "2"
+
+        # Loop de rotas
+        while True:
+            print("\n" + "-"*60)
+            origin = input("Origem (ex: D) ou 'voltar': ").strip().upper()
+            if origin in ['VOLTAR', 'SAIR', '0']:
+                break
                 
-                if new_distance < distances[neighbor]:
-                    distances[neighbor] = new_distance
-                    predecessors[neighbor] = vertex
+            destination = input("Destino (ex: C15): ").strip().upper()
 
-    # Verificação de ciclo negativo (não esperado neste projeto)
-    for vertex in graph.get_vertices():
-        if distances[vertex] == float('inf'):
-            continue
-        for edge in graph.get_neighbors(vertex):
-            if distances[vertex] + edge.weight < distances[edge.target]:
-                return None, float('inf')  # Ciclo negativo detectado
+            if use_bellman:
+                from src.algorithms.bellman_ford import find_shortest_path_bellman_ford
+                result = find_shortest_path_bellman_ford(service.graph, origin, destination)
+            else:
+                result = service.calculate_route(origin, destination)
 
-    # Se não há caminho
-    if distances[target] == float('inf'):
-        return None, float('inf')
+            print("\n" + "-" * 55)
+            if result["success"]:
+                print(f"✅ CAMINHO MÍNIMO ENCONTRADO ({result.get('algorithm', 'Dijkstra')})")
+                print(f"Caminho: {' → '.join(result['path'])}")
+                print(f"Tempo estimado: {result['total_time']} minutos")
+                
+                if input("\nVisualizar no mapa fictício? (s/n): ").strip().lower() in ['s', 'sim', 'y']:
+                    try:
+                        from src.visualization.graph_visualizer import GraphVisualizer
+                        visualizer = GraphVisualizer()
+                        visualizer.draw_graph(service.graph, result['path'])
+                    except Exception as e:
+                        print(f"Erro na visualização: {e}")
+            else:
+                print("❌ " + result["message"])
+            print("-" * 55)
 
-    # Reconstrução do caminho
-    path: List[str] = []
-    current = target
-    while current is not None:
-        path.append(current.label)
-        current = predecessors[current]
-    
-    path.reverse()
-    return path, int(distances[target])
-
-
-# Função auxiliar similar ao Dijkstra
-def find_shortest_path_bellman_ford(graph: Graph, source: str, target: str) -> Dict:
-    """Retorna resultado formatado."""
-    path, total_time = bellman_ford(graph, source, target)
-    
-    if path is None:
-        return {
-            "success": False,
-            "message": f"Não existe caminho entre {source} e {target} (ou ciclo negativo detectado)",
-            "path": None,
-            "total_time": None,
-            "algorithm": "Bellman-Ford"
-        }
-    
-    return {
-        "success": True,
-        "path": path,
-        "total_time": total_time,
-        "message": f"Caminho encontrado com Bellman-Ford (tempo: {total_time} minutos)",
-        "algorithm": "Bellman-Ford"
-    }
+if __name__ == "__main__":
+    main()

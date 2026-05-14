@@ -5,16 +5,10 @@ from ..core.vertex import Vertex
 
 def dijkstra(graph: Graph, source_label: str, target_label: str) -> Tuple[Optional[List[str]], int]:
     """
-    implementa o algoritmo de Dijkstra para encontrar o caminho de menor tempo
-    entre origem e destino em um grafo dirigido e ponderado.
-    
-    retorna:
-        - tuple: (lista com o caminho de vértices, tempo total)
-        - se não houver caminho: (None, float('inf'))
+    Implementa o algoritmo de Dijkstra para encontrar o caminho de menor tempo.
     """
-    # verifica se os vértices existem
-    source = None
-    target = None
+    # Verifica se os vértices existem
+    source = target = None
     for v in graph.get_vertices():
         if v.label == source_label:
             source = v
@@ -24,22 +18,22 @@ def dijkstra(graph: Graph, source_label: str, target_label: str) -> Tuple[Option
     if not source or not target:
         return None, float('inf')
     
-    # inicialização
-    distances: Dict[Vertex, int] = {vertex: float('inf') for vertex in graph.get_vertices()}
+    # Inicialização
+    distances: Dict[Vertex, float] = {vertex: float('inf') for vertex in graph.get_vertices()}
     distances[source] = 0
     predecessors: Dict[Vertex, Optional[Vertex]] = {vertex: None for vertex in graph.get_vertices()}
     
-    # fila de prioridade (min-heap)
-    priority_queue: List[Tuple[int, Vertex]] = [(0, source)]
+    # Fila de prioridade com contador (evita erro de comparação entre Vertex)
+    priority_queue: List[Tuple[float, int, Vertex]] = []
+    counter = 0
+    heapq.heappush(priority_queue, (0, counter, source))
     
     while priority_queue:
-        current_distance, current = heapq.heappop(priority_queue)
+        current_distance, _, current = heapq.heappop(priority_queue)
         
-        # se já encontramos um caminho melhor, ignora
         if current_distance > distances[current]:
             continue
         
-        # relaxa as arestas dos vizinhos
         for edge in graph.get_neighbors(current):
             neighbor = edge.target
             new_distance = current_distance + edge.weight
@@ -47,27 +41,27 @@ def dijkstra(graph: Graph, source_label: str, target_label: str) -> Tuple[Option
             if new_distance < distances[neighbor]:
                 distances[neighbor] = new_distance
                 predecessors[neighbor] = current
-                heapq.heappush(priority_queue, (new_distance, neighbor))
+                counter += 1
+                heapq.heappush(priority_queue, (new_distance, counter, neighbor))
     
-    # reconstrução do caminho
+    # Se não encontrou caminho
     if distances[target] == float('inf'):
         return None, float('inf')
     
-    # monta o caminho do target até o source
+    # Reconstrução do caminho
     path: List[str] = []
     current = target
     while current is not None:
         path.append(current.label)
         current = predecessors[current]
     
-    path.reverse()  # inverte para ficar da origem ao destino
-    
-    return path, distances[target]
+    path.reverse()
+    return path, int(distances[target])
 
 
-# função auxiliar para facilitar uso
+# Função auxiliar usada em todo o projeto
 def find_shortest_path(graph: Graph, source: str, target: str) -> Dict:
-    """Retorna resultado formatado para uso na interface/service."""
+    """Retorna resultado formatado para uso na interface e service."""
     path, total_time = dijkstra(graph, source, target)
     
     if path is None:
